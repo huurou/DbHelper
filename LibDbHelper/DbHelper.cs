@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Data.Common;
 using System.Linq;
 using System.Threading;
@@ -21,7 +22,7 @@ namespace LibDbHelper
 
         protected abstract DbCommand GetCommand(string sql, DbConnection connection);
 
-        protected abstract DbParameter GetParameter(string parameterName, object value);
+        public abstract DbParameter GetParameter(string parameterName, object value);
 
         /// <summary>
         /// Queryの非同期バージョンです。
@@ -54,5 +55,37 @@ namespace LibDbHelper
                 }
             }
         }
+
+        /// <summary>
+        /// トランザクション内でSQLステートメントを実行する。
+        /// </summary>
+        /// <param name="sql">実行するSQL</param>
+        /// <param name="parameters">パラメーターのコレクション</param>
+        /// <param name="isolationLevel">トランザクションロック動作のレベル</param>
+        public async Task ExecuteAsync(string sql, IEnumerable<DbParameter> parameters, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        {
+            using (var connection = GetConnection(ConnectionString))
+            using (var command = GetCommand(sql, connection))
+            {
+                connection.Open();
+                var transaction = connection.BeginTransaction(isolationLevel);
+                try
+                {
+                    if (parameters != null && parameters.Any())
+                    {
+                        command.Parameters.AddRange(parameters.ToArray());
+                    }
+                    await command.ExecuteNonQueryAsync();
+                    transaction.Commit();
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+        }
+
+        public abstract Task BulkInsertAsync<T>(string table, IEnumerable<string> columns, IEnumerable<string> values, IEnumerable<T> entities, Func<string, T, object> getParameterValue, char placeHolderSymbol = ':');
     }
 }

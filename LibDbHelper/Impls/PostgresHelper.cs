@@ -1,5 +1,8 @@
 ﻿using Npgsql;
+using System;
+using System.Collections.Generic;
 using System.Data.Common;
+using System.Threading.Tasks;
 
 namespace LibDbHelper.Impls
 {
@@ -19,9 +22,14 @@ namespace LibDbHelper.Impls
             return new NpgsqlCommand(sql, (NpgsqlConnection)connection);
         }
 
-        protected override DbParameter GetParameter(string parameterName, object value)
+        public override DbParameter GetParameter(string parameterName, object value)
         {
             return new NpgsqlParameter(parameterName, value);
+        }
+
+        public override Task BulkInsertAsync<T>(string table, IEnumerable<string> columns, IEnumerable<string> values, IEnumerable<T> entities, Func<string, T, object> getParameterValue, char placeHolderSymbol)
+        {
+            throw new NotImplementedException();
         }
     }
 }

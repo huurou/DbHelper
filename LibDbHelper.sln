@@ -5,6 +5,8 @@ VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibDbHelper", "LibDbHelper\LibDbHelper.csproj", "{C8CA0DEB-8A69-4CDE-AFED-D17CC2A7424E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibDbHelper.Test", "LibDbHelper.Test\LibDbHelper.Test.csproj", "{EE27A03C-1DB4-42B1-AD3D-7F62D120E19C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{C8CA0DEB-8A69-4CDE-AFED-D17CC2A7424E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8CA0DEB-8A69-4CDE-AFED-D17CC2A7424E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8CA0DEB-8A69-4CDE-AFED-D17CC2A7424E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE27A03C-1DB4-42B1-AD3D-7F62D120E19C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE27A03C-1DB4-42B1-AD3D-7F62D120E19C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE27A03C-1DB4-42B1-AD3D-7F62D120E19C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE27A03C-1DB4-42B1-AD3D-7F62D120E19C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
