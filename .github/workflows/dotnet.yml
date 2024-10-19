@@ -7,15 +7,21 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      TEST_DLL : LibDbHelper.Test\bin\Debug\net48\LibDbHelper.Test.dll
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
     - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v1.0.2
+      uses: microsoft/setup-msbuild@v2
     - name: Build
       run: msbuild /t:Restore
+    - name: Setup VSTest
+      uses: darenm/Setup-VSTest@v1.3
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: vstest.console.exe TEST_DLL
