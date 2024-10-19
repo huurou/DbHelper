@@ -59,7 +59,7 @@ public class StubDbHelper(ITestOutputHelper testOutputHelper) : DbHelper("")
         sql.Append("SELECT * FROM DUAL");
         await ExecuteAsync(sql.ToString(), parameters);
 
-        // テスト用標準出力
+        // テスト用標出力
         testOutputHelper.WriteLine($"sql:");
         testOutputHelper.WriteLine(sql.ToString());
         testOutputHelper.WriteLine("parameters:");
