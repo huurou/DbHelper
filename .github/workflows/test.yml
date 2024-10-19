@@ -8,20 +8,19 @@ jobs:
   build:
     runs-on: windows-latest
     env:
-      TEST_DLL : LibDbHelper.Test\bin\Debug\net48\LibDbHelper.Test.dll
+      SOLUTION_FILE: LibDbHelper.sln
+      TEST_DLL: LibDbHelper.Test\bin\Debug\net48\LibDbHelper.Test.dll
     steps:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v2
+    - name: Restore
+      run: msbuild /t:Restore $env:SOLUTION_FILE
     - name: Build
-      run: msbuild /t:Restore
+      run: msbuild $env:SOLUTION_FILE
     - name: Setup VSTest
       uses: darenm/Setup-VSTest@v1.3
     - name: Test
-      run: vstest.console.exe TEST_DLL
+      run: vstest.console.exe $env:TEST_DLL
