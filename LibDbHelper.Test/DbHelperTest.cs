@@ -44,7 +44,8 @@ public class DbHelperTest(ITestOutputHelper testOutputHelper)
         List<Entity> entities = [new(0, "x"), new(1, "y"), new(2, "z")];
 
         // Act
-        await helper_.BulkInsertAsync(table, columns, values, entities,
+        await helper_.BulkInsertAsync(
+            table, columns, values, entities,
             (name, x) => name switch
             {
                 "a" => x.A,
