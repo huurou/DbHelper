@@ -1,12 +1,13 @@
 ﻿using System.Collections;
 using System.Data.Common;
+using LibDbHelper.Test.Items;
 
 namespace LibDbHelper.Test.Stubs;
 
-public class StubDbDataReader : DbDataReader
+public class StubDbDataReader(Table table) : DbDataReader
 {
-    public override object this[int ordinal] => throw new NotImplementedException();
-    public override object this[string name] => throw new NotImplementedException();
+    public override object this[int ordinal] => table[ordinal][rowNum_];
+    public override object this[string name] => table[name][rowNum_];
 
     public override int Depth { get; }
     public override int FieldCount { get; }
@@ -14,14 +15,16 @@ public class StubDbDataReader : DbDataReader
     public override bool IsClosed { get; }
     public override int RecordsAffected { get; }
 
+    private int rowNum_ = -1;
+
     public override bool GetBoolean(int ordinal)
     {
-        throw new NotImplementedException();
+        return (int)table[ordinal][rowNum_] != 0;
     }
 
     public override byte GetByte(int ordinal)
     {
-        throw new NotImplementedException();
+        return (byte)table[ordinal][rowNum_];
     }
 
     public override long GetBytes(int ordinal, long dataOffset, byte[] buffer, int bufferOffset, int length)
@@ -31,7 +34,7 @@ public class StubDbDataReader : DbDataReader
 
     public override char GetChar(int ordinal)
     {
-        throw new NotImplementedException();
+        return (char)table[ordinal][rowNum_];
     }
 
     public override long GetChars(int ordinal, long dataOffset, char[] buffer, int bufferOffset, int length)
@@ -41,87 +44,89 @@ public class StubDbDataReader : DbDataReader
 
     public override string GetDataTypeName(int ordinal)
     {
-        throw new NotImplementedException();
+        return table[ordinal][rowNum_].GetType().Name;
     }
 
     public override DateTime GetDateTime(int ordinal)
     {
-        throw new NotImplementedException();
+        return (DateTime)table[ordinal][rowNum_];
     }
 
     public override decimal GetDecimal(int ordinal)
     {
-        throw new NotImplementedException();
+        return (decimal)table[ordinal][rowNum_];
     }
 
     public override double GetDouble(int ordinal)
     {
-        throw new NotImplementedException();
+        return (double)table[ordinal][rowNum_];
     }
 
     public override IEnumerator GetEnumerator()
     {
-        throw new NotImplementedException();
+        return table.Columns.Select(x => x[rowNum_]).GetEnumerator();
     }
 
     public override Type GetFieldType(int ordinal)
     {
-        throw new NotImplementedException();
+        return table[ordinal][rowNum_].GetType();
     }
 
     public override float GetFloat(int ordinal)
     {
-        throw new NotImplementedException();
+        return (float)table[ordinal][rowNum_];
     }
 
     public override Guid GetGuid(int ordinal)
     {
-        throw new NotImplementedException();
+        return (Guid)table[ordinal][rowNum_];
     }
 
     public override short GetInt16(int ordinal)
     {
-        throw new NotImplementedException();
+        return (short)table[ordinal][rowNum_];
     }
 
     public override int GetInt32(int ordinal)
     {
-        throw new NotImplementedException();
+        return (int)table[ordinal][rowNum_];
     }
 
     public override long GetInt64(int ordinal)
     {
-        throw new NotImplementedException();
+        return (long)table[ordinal][rowNum_];
     }
 
     public override string GetName(int ordinal)
     {
-        throw new NotImplementedException();
+        return table[ordinal].Name;
     }
 
     public override int GetOrdinal(string name)
     {
-        throw new NotImplementedException();
+        return table.ColumnNames.IndexOf(name);
     }
 
     public override string GetString(int ordinal)
     {
-        throw new NotImplementedException();
+        return (string)table[ordinal][rowNum_];
     }
 
     public override object GetValue(int ordinal)
     {
-        throw new NotImplementedException();
+        return table[ordinal][rowNum_];
     }
 
     public override int GetValues(object[] values)
     {
-        throw new NotImplementedException();
+        var array = table.ColumnNames.Select(x => x[rowNum_]).ToArray();
+        array.CopyTo(values, 0);
+        return array.Length;
     }
 
     public override bool IsDBNull(int ordinal)
     {
-        throw new NotImplementedException();
+        return this[ordinal] is DBNull;
     }
 
     public override bool NextResult()
@@ -129,10 +134,9 @@ public class StubDbDataReader : DbDataReader
         throw new NotImplementedException();
     }
 
-
     public override bool Read()
     {
-        return count_-- > 0;
+        rowNum_++;
+        return 0 <= rowNum_ && rowNum_ < table.Columns[0].Values.Count;
     }
-    private int count_ = 3;
 }

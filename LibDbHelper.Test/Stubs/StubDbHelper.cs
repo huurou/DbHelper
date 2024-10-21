@@ -1,19 +1,22 @@
 ﻿using System.Data.Common;
 using System.Text;
+using LibDbHelper.Test.Items;
 using Xunit.Abstractions;
 
 namespace LibDbHelper.Test.Stubs;
 
 public class StubDbHelper(ITestOutputHelper testOutputHelper) : DbHelper("")
 {
+    private Table table_;
+
     protected override DbConnection GetConnection(string connectionString)
     {
-        return new StubDbConnection();
+        return new StubDbConnection(table_);
     }
 
     protected override DbCommand GetCommand(string sql, DbConnection connection)
     {
-        return new StubDbCommand();
+        return new StubDbCommand(table_);
     }
 
     public override DbParameter GetParameter(string parameterName, object value)
@@ -64,5 +67,10 @@ public class StubDbHelper(ITestOutputHelper testOutputHelper) : DbHelper("")
         testOutputHelper.WriteLine(sql.ToString());
         testOutputHelper.WriteLine("parameters:");
         testOutputHelper.WriteLine(string.Join("\n", parameters.Select(x => x.ToString())));
+    }
+
+    public void SetTable(Table table)
+    {
+        table_ = table;
     }
 }
