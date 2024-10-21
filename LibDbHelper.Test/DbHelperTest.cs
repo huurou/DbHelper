@@ -1,4 +1,4 @@
-using LibDbHelper.Attributes;
+ï»¿using LibDbHelper.Attributes;
 using LibDbHelper.Test.Items;
 using LibDbHelper.Test.Stubs;
 using System.Data.Common;
@@ -11,7 +11,7 @@ public class DbHelperTest(ITestOutputHelper testOutputHelper)
     private readonly DbHelper helper_ = new StubDbHelper(testOutputHelper);
 
     [Fact]
-    public async Task QueryAsync_ColumnName‘®«•sŽg—p()
+    public async Task QueryAsync_ColumnNameå±žæ€§ä¸ä½¿ç”¨()
     {
         // Arange
         var table = new Table(
@@ -36,7 +36,7 @@ public class DbHelperTest(ITestOutputHelper testOutputHelper)
     }
 
     [Fact]
-    public async Task QueryAsync_ColumnName‘®«Žg—p()
+    public async Task QueryAsync_ColumnNameå±žæ€§ä½¿ç”¨()
     {
         // Arange
         var table = new Table(
@@ -86,7 +86,7 @@ public class DbHelperTest(ITestOutputHelper testOutputHelper)
             {
                 "a" => x.A,
                 "b" => x.B,
-                _ => throw new ArgumentException($"“o˜^‚³‚ê‚Ä‚¢‚È‚¢ƒpƒ‰ƒ[ƒ^[–¼‚Å‚·B name:{name}", nameof(name))
+                _ => throw new ArgumentException($"ç™»éŒ²ã•ã‚Œã¦ã„ãªã„ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼åã§ã™ã€‚ name:{name}", nameof(name))
             }
         );
 
