@@ -42,6 +42,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\ColumnNameAttribute.cs" />
+    <Compile Include="DbDataReaderExtensions.cs" />
     <Compile Include="DbHelper.cs" />
     <Compile Include="Impls\OracleHelper.cs" />
     <Compile Include="Impls\PostgresHelper.cs" />

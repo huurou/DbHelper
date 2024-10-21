@@ -1,9 +1,10 @@
 ﻿using System.Data;
 using System.Data.Common;
+using LibDbHelper.Test.Items;
 
 namespace LibDbHelper.Test.Stubs;
 
-public class StubDbCommand : DbCommand
+public class StubDbCommand(Table table) : DbCommand
 {
     public override string CommandText { get; set; }
     public override int CommandTimeout { get; set; }
@@ -39,6 +40,6 @@ public class StubDbCommand : DbCommand
 
     protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
     {
-        return new StubDbDataReader();
+        return new StubDbDataReader(table);
     }
 }
