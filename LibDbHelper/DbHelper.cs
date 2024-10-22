@@ -64,12 +64,13 @@ namespace LibDbHelper
         /// <param name="sql">実行するSQL</param>
         /// <param name="parameters">パラメーターのコレクション</param>
         /// <param name="isolationLevel">トランザクションロック動作のレベル</param>
-        public async Task ExecuteAsync(string sql, IEnumerable<DbParameter> parameters, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        /// <param name="cancellationToken">キャンセル要求を監視するためのトークン</param>
+        public async Task ExecuteAsync(string sql, IEnumerable<DbParameter> parameters, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, CancellationToken cancellationToken = default)
         {
             using (var connection = GetConnection(ConnectionString))
             using (var command = GetCommand(sql, connection))
             {
-                connection.Open();
+                await connection.OpenAsync(cancellationToken);
                 var transaction = connection.BeginTransaction(isolationLevel);
                 try
                 {
@@ -77,7 +78,7 @@ namespace LibDbHelper
                     {
                         command.Parameters.AddRange(parameters.ToArray());
                     }
-                    await command.ExecuteNonQueryAsync();
+                    await command.ExecuteNonQueryAsync(cancellationToken);
                     transaction.Commit();
                 }
                 catch (Exception)
