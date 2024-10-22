@@ -1,9 +1,20 @@
-﻿namespace LibDbHelper.Test.Items;
+﻿using System.Collections.Generic;
+using System.Linq;
 
-public class Table(IEnumerable<string> columnNames, IEnumerable<IEnumerable<object>> columnValues)
+namespace LibDbHelper.Test.Items
 {
-    public List<string> ColumnNames { get; } = [.. columnNames];
-    public List<Column> Columns { get; } = [.. columnNames.Select((x, i) => new Column(x, columnValues.ElementAt(i)))];
-    public Column this[int index] => Columns[index];
-    public Column this[string name] => Columns[ColumnNames.IndexOf(name)];
+    public class Table
+    {
+        public List<string> ColumnNames { get; }
+        public List<Column> Columns { get; }
+
+        public Column this[int index] => Columns[index];
+        public Column this[string name] => Columns[ColumnNames.IndexOf(name)];
+
+        public Table(IEnumerable<string> columnNames, IEnumerable<IEnumerable<object>> columnValues)
+        {
+            ColumnNames = columnNames.ToList();
+            Columns = columnNames.Select((x, i) => new Column(x, columnValues.ElementAt(i))).ToList();
+        }
+    }
 }
