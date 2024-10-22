@@ -59,6 +59,86 @@ namespace LibDbHelper
         }
 
         /// <summary>
+        /// QueryFirstの非同期バージョンです。
+        /// クエリを実行し結果セットの最初の行を返します。
+        /// 他のすべての行は無視されます。
+        /// 結果セットが0件のときはnullを返します。
+        /// </summary>
+        /// <typeparam name="T">結果セットのアイテムの型</typeparam>
+        /// <param name="sql">実行するSQL</param>
+        /// <param name="parameters">パラメーターのコレクション</param>
+        /// <param name="createEntity">実行結果から結果セットのアイテムを作成するデリゲート</param>
+        /// <param name="cancellationToken">キャンセル要求を監視するためのトークン</param>
+        /// <returns>結果セット</returns>
+        public async Task<T> QueryFirstAsync<T>(string sql, IEnumerable<DbParameter> parameters = default, Func<DbDataReader, T> createEntity = default, CancellationToken cancellationToken = default) where T : class
+        {
+            using (var connection = GetConnection(ConnectionString))
+            using (var command = GetCommand(sql, connection))
+            {
+                await connection.OpenAsync(cancellationToken);
+                if (parameters != null && parameters.Any())
+                {
+                    command.Parameters.AddRange(parameters.ToArray());
+                }
+                using (var reader = await command.ExecuteReaderAsync(cancellationToken))
+                {
+                    if (await reader.ReadAsync(cancellationToken))
+                    {
+                        return (createEntity ?? CreateEntity<T>)(reader);
+                    }
+                    return null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// QuerySingleの非同期バージョンです。
+        /// クエリを実行し結果セットを返します。
+        /// 結果セットが複数件のとき例外をスローします。
+        /// 結果セットが0件のときはnullを返します。
+        /// </summary>
+        /// <typeparam name="T">結果セットのアイテムの型</typeparam>
+        /// <param name="sql">実行するSQL</param>
+        /// <param name="parameters">パラメーターのコレクション</param>
+        /// <param name="createEntity">実行結果から結果セットのアイテムを作成するデリゲート</param>
+        /// <param name="cancellationToken">キャンセル要求を監視するためのトークン</param>
+        /// <returns>結果セット</returns>
+        public async Task<T> QuerySingleAsync<T>(string sql, IEnumerable<DbParameter> parameters = default, Func<DbDataReader, T> createEntity = default, CancellationToken cancellationToken = default) where T : class
+        {
+            using (var connection = GetConnection(ConnectionString))
+            using (var command = GetCommand(sql, connection))
+            {
+                await connection.OpenAsync(cancellationToken);
+                if (parameters != null && parameters.Any())
+                {
+                    command.Parameters.AddRange(parameters.ToArray());
+                }
+                using (var reader = await command.ExecuteReaderAsync(cancellationToken))
+                {
+                    var result = default(T);
+                    var count = 0;
+                    if (await reader.ReadAsync(cancellationToken))
+                    {
+                        if (count == 0)
+                        {
+                            result = (createEntity ?? CreateEntity<T>)(reader);
+                        }
+                        count++;
+                    }
+                    if (count == 1)
+                    {
+                        return result;
+                    }
+                    else if (count > 1)
+                    {
+                        throw new InvalidOperationException("複数のレコードが存在します。");
+                    }
+                    return null;
+                }
+            }
+        }
+
+        /// <summary>
         /// トランザクション内でSQLステートメントを実行する。
         /// </summary>
         /// <param name="sql">実行するSQL</param>
