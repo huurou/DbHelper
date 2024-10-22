@@ -1,45 +1,53 @@
-﻿using System.Data;
+﻿using LibDbHelper.Test.Items;
+using System.Data;
 using System.Data.Common;
-using LibDbHelper.Test.Items;
 
-namespace LibDbHelper.Test.Stubs;
-
-public class StubDbCommand(Table table) : DbCommand
+namespace LibDbHelper.Test.Stubs
 {
-    public override string CommandText { get; set; }
-    public override int CommandTimeout { get; set; }
-    public override CommandType CommandType { get; set; }
-    public override bool DesignTimeVisible { get; set; }
-    public override UpdateRowSource UpdatedRowSource { get; set; }
-    protected override DbConnection DbConnection { get; set; }
-    protected override DbParameterCollection DbParameterCollection { get; } = new StubDbParameterCollection();
-    protected override DbTransaction DbTransaction { get; set; }
-
-    public override void Cancel()
+    public class StubDbCommand : DbCommand
     {
-    }
+        public override string CommandText { get; set; }
+        public override int CommandTimeout { get; set; }
+        public override CommandType CommandType { get; set; }
+        public override bool DesignTimeVisible { get; set; }
+        public override UpdateRowSource UpdatedRowSource { get; set; }
+        protected override DbConnection DbConnection { get; set; }
+        protected override DbParameterCollection DbParameterCollection { get; } = new StubDbParameterCollection();
+        protected override DbTransaction DbTransaction { get; set; }
 
-    public override int ExecuteNonQuery()
-    {
-        return 1;
-    }
+        private readonly Table table_;
 
-    public override object ExecuteScalar()
-    {
-        return new object();
-    }
+        public StubDbCommand(Table table)
+        {
+            table_ = table;
+        }
 
-    public override void Prepare()
-    {
-    }
+        public override void Cancel()
+        {
+        }
 
-    protected override DbParameter CreateDbParameter()
-    {
-        return new StubDbParameter();
-    }
+        public override int ExecuteNonQuery()
+        {
+            return 1;
+        }
 
-    protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
-    {
-        return new StubDbDataReader(table);
+        public override object ExecuteScalar()
+        {
+            return new object();
+        }
+
+        public override void Prepare()
+        {
+        }
+
+        protected override DbParameter CreateDbParameter()
+        {
+            return new StubDbParameter();
+        }
+
+        protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
+        {
+            return new StubDbDataReader(table_);
+        }
     }
 }
