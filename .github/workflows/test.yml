@@ -6,21 +6,20 @@ on:
     branches: [ "main" ]
 jobs:
   test:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     env:
       SOLUTION_FILE: LibDbHelper.sln
       TEST_DLL: LibDbHelper.Test\bin\Debug\net48\LibDbHelper.Test.dll
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
       with:
-        fetch-depth: 0
-    - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v2
-    - name: Restore
-      run: msbuild /t:Restore $env:SOLUTION_FILE
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: dotnet restore
     - name: Build
-      run: msbuild $env:SOLUTION_FILE
-    - name: Setup VSTest
-      uses: darenm/Setup-VSTest@v1.3
+      run: dotnet build --no-restore
     - name: Test
-      run: vstest.console.exe $env:TEST_DLL
+      run: dotnet test --no-build --verbosity normal
