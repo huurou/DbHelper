@@ -39,7 +39,7 @@ namespace LibDbHelper.Test
                 r => new Entity(r.GetInt("col_a"), r.GetString("col_b"))
             );
 
-            //Assert
+            // Assert
             var expected = new List<Entity>
             {
                 new Entity(0, "x"),
@@ -66,7 +66,7 @@ namespace LibDbHelper.Test
             // Act
             var actual = await helper_.QueryAsync<Entity>(sql, parameters);
 
-            //Assert
+            // Assert
             var expected = new List<Entity>
             {
                 new Entity(0, "x"),
@@ -74,6 +74,101 @@ namespace LibDbHelper.Test
                 new Entity(2, "z"),
             }.AsReadOnly();
             Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public async Task QueryFirstAsync_結果セット0件()
+        {
+            // Arange
+            var table = new Table("col_a", "col_b");
+            ((StubDbHelper)helper_).SetTable(table);
+            var sql = "SELECT * FROM T";
+            var parameters = new List<DbParameter> { helper_.GetParameter("n", 1) };
+
+            // Act
+            var exception = await Record.ExceptionAsync(async () => _ = await helper_.QueryFirstAsync<Entity>(sql, parameters));
+
+            // Assert
+            Assert.IsType<InvalidOperationException>(exception);
+            Assert.Equal("レコードが存在しません。", exception.Message);
+        }
+
+        [Fact]
+        public async Task QueryFirstAsync_結果セット1件()
+        {
+            // Arange
+            var table = new Table("col_a", "col_b")
+            {
+                { 0, "x" }
+            };
+            ((StubDbHelper)helper_).SetTable(table);
+            var sql = "SELECT * FROM T";
+            var parameters = new List<DbParameter> { helper_.GetParameter("n", 1) };
+
+            // Act
+            var actual = await helper_.QueryFirstAsync<Entity>(sql, parameters);
+
+            // Assert
+            var expected = new Entity(0, "x");
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public async Task QuerySingleAsync_結果セット0件()
+        {
+            // Arange
+            var table = new Table("col_a", "col_b");
+            ((StubDbHelper)helper_).SetTable(table);
+            var sql = "SELECT * FROM T";
+            var parameters = new List<DbParameter> { helper_.GetParameter("n", 1) };
+
+            // Act
+            var exception = await Record.ExceptionAsync(async () => _ = await helper_.QuerySingleAsync<Entity>(sql, parameters));
+
+            // Assert
+            Assert.IsType<InvalidOperationException>(exception);
+            Assert.Equal("レコードが存在しません。", exception.Message);
+        }
+
+        [Fact]
+        public async Task QuerySingleAsync_結果セット1件()
+        {
+            // Arange
+            var table = new Table("col_a", "col_b")
+            {
+                { 0, "x" }
+            };
+            ((StubDbHelper)helper_).SetTable(table);
+            var sql = "SELECT * FROM T";
+            var parameters = new List<DbParameter> { helper_.GetParameter("n", 1) };
+
+            // Act
+            var actual = await helper_.QuerySingleAsync<Entity>(sql, parameters);
+
+            // Assert
+            var expected = new Entity(0, "x");
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public async Task QuerySingleAsync_結果セット2件()
+        {
+            // Arange
+            var table = new Table("col_a", "col_b")
+            {
+                { 0, "x" },
+                { 1, "y" }
+            };
+            ((StubDbHelper)helper_).SetTable(table);
+            var sql = "SELECT * FROM T";
+            var parameters = new List<DbParameter> { helper_.GetParameter("n", 1) };
+
+            // Act
+            var exception = await Record.ExceptionAsync(async () => _ = await helper_.QuerySingleAsync<Entity>(sql, parameters));
+
+            // Assert
+            Assert.IsType<InvalidOperationException>(exception);
+            Assert.Equal("複数のレコードが存在します。", exception.Message);
         }
 
         [Fact]
@@ -86,7 +181,7 @@ namespace LibDbHelper.Test
             // Act
             await helper_.ExecuteAsync(sql, parameters);
 
-            //Assert
+            // Assert
         }
 
         [Fact]
@@ -122,7 +217,7 @@ namespace LibDbHelper.Test
                 }
             );
 
-            //Assert
+            // Assert
         }
 
         private class Entity : IEquatable<Entity>
@@ -152,5 +247,5 @@ namespace LibDbHelper.Test
 
     // Act
 
-    //Assert
+    // Assert
 }

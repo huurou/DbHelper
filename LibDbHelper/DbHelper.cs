@@ -62,7 +62,7 @@ namespace LibDbHelper
         /// QueryFirstの非同期バージョンです。
         /// クエリを実行し結果セットの最初の行を返します。
         /// 他のすべての行は無視されます。
-        /// 結果セットが0件のときはnullを返します。
+        /// 結果セットが0件のとき例外をスローします。
         /// </summary>
         /// <typeparam name="T">結果セットのアイテムの型</typeparam>
         /// <param name="sql">実行するSQL</param>
@@ -86,7 +86,7 @@ namespace LibDbHelper
                     {
                         return (createEntity ?? CreateEntity<T>)(reader);
                     }
-                    return null;
+                    throw new InvalidOperationException("レコードが存在しません。");
                 }
             }
         }
@@ -94,8 +94,7 @@ namespace LibDbHelper
         /// <summary>
         /// QuerySingleの非同期バージョンです。
         /// クエリを実行し結果セットを返します。
-        /// 結果セットが複数件のとき例外をスローします。
-        /// 結果セットが0件のときはnullを返します。
+        /// 結果セットが1件でないとき例外をスローします。
         /// </summary>
         /// <typeparam name="T">結果セットのアイテムの型</typeparam>
         /// <param name="sql">実行するSQL</param>
@@ -116,24 +115,22 @@ namespace LibDbHelper
                 using (var reader = await command.ExecuteReaderAsync(cancellationToken))
                 {
                     var result = default(T);
-                    var count = 0;
                     if (await reader.ReadAsync(cancellationToken))
                     {
-                        if (count == 0)
-                        {
-                            result = (createEntity ?? CreateEntity<T>)(reader);
-                        }
-                        count++;
+                        result = (createEntity ?? CreateEntity<T>)(reader);
                     }
-                    if (count == 1)
+                    else
                     {
-                        return result;
+                        throw new InvalidOperationException("レコードが存在しません。");
                     }
-                    else if (count > 1)
+                    if (await reader.ReadAsync(cancellationToken))
                     {
                         throw new InvalidOperationException("複数のレコードが存在します。");
                     }
-                    return null;
+                    else
+                    {
+                        return result;
+                    }
                 }
             }
         }
