@@ -77,7 +77,7 @@ namespace LibDbHelper.Test
         }
 
         [Fact]
-        public async Task QueryFirstAsync_結果セット0件()
+        public async Task QueryFirstAsync_結果セット0件のとき失敗()
         {
             // Arange
             var table = new Table("col_a", "col_b");
@@ -114,7 +114,7 @@ namespace LibDbHelper.Test
         }
 
         [Fact]
-        public async Task QuerySingleAsync_結果セット0件()
+        public async Task QuerySingleAsync_結果セット0件のとき失敗()
         {
             // Arange
             var table = new Table("col_a", "col_b");
@@ -151,7 +151,7 @@ namespace LibDbHelper.Test
         }
 
         [Fact]
-        public async Task QuerySingleAsync_結果セット2件()
+        public async Task QuerySingleAsync_結果セット2件のとき失敗()
         {
             // Arange
             var table = new Table("col_a", "col_b")
