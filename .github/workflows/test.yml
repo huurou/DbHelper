@@ -7,9 +7,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      SOLUTION_FILE: LibDbHelper.sln
-      TEST_DLL: LibDbHelper.Test\bin\Debug\net48\LibDbHelper.Test.dll
     steps:
     - name: Checkout
       uses: actions/checkout@v4
