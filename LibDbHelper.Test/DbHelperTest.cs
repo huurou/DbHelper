@@ -23,14 +23,12 @@ namespace LibDbHelper.Test
         public async Task QueryAsync_ColumnName属性不使用()
         {
             // Arange
-            var table = new Table(
-                new List<string> { "col_a", "col_b" },
-                new List<IEnumerable<object>>
-                {
-                    new List<object>{ 0, 1, 2 },
-                    new List<object>{ "x", "y", "z" },
-                }
-            );
+            var table = new Table("col_a", "col_b")
+            {
+                { 0, "x" },
+                { 1, "y" },
+                { 2, "z" },
+            };
             ((StubDbHelper)helper_).SetTable(table);
             var sql = "SELECT * FROM T";
             var parameters = new List<DbParameter> { helper_.GetParameter("n", 1) };
@@ -55,14 +53,12 @@ namespace LibDbHelper.Test
         public async Task QueryAsync_ColumnName属性使用()
         {
             // Arange
-            var table = new Table(
-                new List<string> { "col_a", "col_b" },
-                new List<IEnumerable<object>>
-                {
-                    new List<object>{ 0, 1, 2 },
-                    new List<object>{ "x", "y", "z" },
-                }
-            );
+            var table = new Table("col_a", "col_b")
+            {
+                { 0, "x" },
+                { 1, "y" },
+                { 2, "z" },
+            };
             ((StubDbHelper)helper_).SetTable(table);
             var sql = "SELECT * FROM T";
             var parameters = new List<DbParameter> { helper_.GetParameter("n", 1) };

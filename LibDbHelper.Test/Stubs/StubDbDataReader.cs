@@ -8,8 +8,8 @@ namespace LibDbHelper.Test.Stubs
 {
     public class StubDbDataReader : DbDataReader
     {
-        public override object this[int ordinal] => table_[ordinal][rowNum_];
-        public override object this[string name] => table_[name][rowNum_];
+        public override object this[int ordinal] => table_[rowNum_][ordinal];
+        public override object this[string name] => table_[rowNum_][name];
 
         public override int Depth { get; }
         public override int FieldCount { get; }
@@ -27,12 +27,12 @@ namespace LibDbHelper.Test.Stubs
 
         public override bool GetBoolean(int ordinal)
         {
-            return (int)table_[ordinal][rowNum_] != 0;
+            return (int)table_[rowNum_][ordinal] != 0;
         }
 
         public override byte GetByte(int ordinal)
         {
-            return (byte)table_[ordinal][rowNum_];
+            return (byte)table_[rowNum_][ordinal];
         }
 
         public override long GetBytes(int ordinal, long dataOffset, byte[] buffer, int bufferOffset, int length)
@@ -42,7 +42,7 @@ namespace LibDbHelper.Test.Stubs
 
         public override char GetChar(int ordinal)
         {
-            return (char)table_[ordinal][rowNum_];
+            return (char)table_[rowNum_][ordinal];
         }
 
         public override long GetChars(int ordinal, long dataOffset, char[] buffer, int bufferOffset, int length)
@@ -52,62 +52,62 @@ namespace LibDbHelper.Test.Stubs
 
         public override string GetDataTypeName(int ordinal)
         {
-            return table_[ordinal][rowNum_].GetType().Name;
+            return table_[rowNum_][ordinal].GetType().Name;
         }
 
         public override DateTime GetDateTime(int ordinal)
         {
-            return (DateTime)table_[ordinal][rowNum_];
+            return (DateTime)table_[rowNum_][ordinal];
         }
 
         public override decimal GetDecimal(int ordinal)
         {
-            return (decimal)table_[ordinal][rowNum_];
+            return (decimal)table_[rowNum_][ordinal];
         }
 
         public override double GetDouble(int ordinal)
         {
-            return (double)table_[ordinal][rowNum_];
+            return (double)table_[rowNum_][ordinal];
         }
 
         public override IEnumerator GetEnumerator()
         {
-            return table_.Columns.Select(x => x[rowNum_]).GetEnumerator();
+            return table_.GetEnumerator();
         }
 
         public override Type GetFieldType(int ordinal)
         {
-            return table_[ordinal][rowNum_].GetType();
+            return table_[rowNum_][ordinal].GetType();
         }
 
         public override float GetFloat(int ordinal)
         {
-            return (float)table_[ordinal][rowNum_];
+            return (float)table_[rowNum_][ordinal];
         }
 
         public override Guid GetGuid(int ordinal)
         {
-            return (Guid)table_[ordinal][rowNum_];
+            return (Guid)table_[rowNum_][ordinal];
         }
 
         public override short GetInt16(int ordinal)
         {
-            return (short)table_[ordinal][rowNum_];
+            return (short)table_[rowNum_][ordinal];
         }
 
         public override int GetInt32(int ordinal)
         {
-            return (int)table_[ordinal][rowNum_];
+            return (int)table_[rowNum_][ordinal];
         }
 
         public override long GetInt64(int ordinal)
         {
-            return (long)table_[ordinal][rowNum_];
+            return (long)table_[rowNum_][ordinal];
         }
 
         public override string GetName(int ordinal)
         {
-            return table_[ordinal].Name;
+            return table_.GetColumn(ordinal).Name;
         }
 
         public override int GetOrdinal(string name)
@@ -117,12 +117,12 @@ namespace LibDbHelper.Test.Stubs
 
         public override string GetString(int ordinal)
         {
-            return (string)table_[ordinal][rowNum_];
+            return (string)table_[rowNum_][ordinal];
         }
 
         public override object GetValue(int ordinal)
         {
-            return table_[ordinal][rowNum_];
+            return table_[rowNum_][ordinal];
         }
 
         public override int GetValues(object[] values)
@@ -145,7 +145,7 @@ namespace LibDbHelper.Test.Stubs
         public override bool Read()
         {
             rowNum_++;
-            return 0 <= rowNum_ && rowNum_ < table_.Columns[0].Values.Count;
+            return 0 <= rowNum_ && rowNum_ < table_.Count;
         }
     }
 }

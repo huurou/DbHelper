@@ -1,19 +1,34 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace LibDbHelper.Test.Items
 {
-    public class Column
+    public class Column : IEnumerable<object>
     {
-        public string Name { get; set; }
-        public List<object> Values { get; set; }
+        public string Name { get; }
+        public object this[int index] => values_[index];
 
-        public object this[int index] => Values[index];
+        private readonly ReadOnlyCollection<object> values_;
 
         public Column(string name, IEnumerable<object> values)
         {
+            if (name is null) { throw new ArgumentNullException(nameof(name)); }
+            if (values is null) { throw new ArgumentNullException(nameof(values)); }
             Name = name;
-            Values = values.ToList();
+            values_ = values.ToList().AsReadOnly();
+        }
+
+        public IEnumerator<object> GetEnumerator()
+        {
+            return values_.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }
