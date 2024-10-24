@@ -29,6 +29,20 @@ namespace LibDbHelper
         /// <summary>
         /// Queryの非同期バージョンです。
         /// クエリを実行し結果セットを返します。
+        /// ColumnName属性に基づいてEntityを作成します。
+        /// </summary>
+        /// <typeparam name="T">結果セットのアイテムの型</typeparam>
+        /// <param name="sql">実行するSQL</param>
+        /// <param name="parameters">パラメーターのコレクション</param>
+        /// <param name="cancellationToken">キャンセル要求を監視するためのトークン</param>
+        public async Task<ReadOnlyCollection<T>> QueryAsync<T>(string sql, IEnumerable<DbParameter> parameters = default, CancellationToken cancellationToken = default) where T : class
+        {
+            return await QueryAsync(sql, CreateEntity<T>, parameters, cancellationToken);
+        }
+
+        /// <summary>
+        /// Queryの非同期バージョンです。
+        /// クエリを実行し結果セットを返します。
         /// </summary>
         /// <typeparam name="T">結果セットのアイテムの型</typeparam>
         /// <param name="sql">実行するSQL</param>
@@ -36,7 +50,7 @@ namespace LibDbHelper
         /// <param name="parameters">パラメーターのコレクション</param>
         /// <param name="cancellationToken">キャンセル要求を監視するためのトークン</param>
         /// <returns>結果セット</returns>
-        public async Task<ReadOnlyCollection<T>> QueryAsync<T>(string sql, IEnumerable<DbParameter> parameters = default, Func<DbDataReader, T> createEntity = default, CancellationToken cancellationToken = default) where T : class
+        public async Task<ReadOnlyCollection<T>> QueryAsync<T>(string sql, Func<DbDataReader, T> createEntity, IEnumerable<DbParameter> parameters = default, CancellationToken cancellationToken = default)
         {
             using (var connection = GetConnection(ConnectionString))
             using (var command = GetCommand(sql, connection))
@@ -51,11 +65,28 @@ namespace LibDbHelper
                     var result = new List<T>();
                     while (await reader.ReadAsync(cancellationToken))
                     {
-                        result.Add((createEntity ?? CreateEntity<T>)(reader));
+                        result.Add(createEntity(reader));
                     }
                     return result.AsReadOnly();
                 }
             }
+        }
+
+        /// <summary>
+        /// QueryFirstの非同期バージョンです。
+        /// クエリを実行し結果セットの最初の行を返します。
+        /// 他のすべての行は無視されます。
+        /// 結果セットが0件のとき例外をスローします。
+        /// ColumnName属性に基づいてEntityを作成します。
+        /// </summary>
+        /// <typeparam name="T">結果セットのアイテムの型</typeparam>
+        /// <param name="sql">実行するSQL</param>
+        /// <param name="parameters">パラメーターのコレクション</param>
+        /// <param name="cancellationToken">キャンセル要求を監視するためのトークン</param>
+        /// <returns>結果セット</returns>
+        public async Task<T> QueryFirstAsync<T>(string sql, IEnumerable<DbParameter> parameters = default, CancellationToken cancellationToken = default) where T : class
+        {
+            return await QueryFirstAsync(sql, CreateEntity<T>, parameters, cancellationToken);
         }
 
         /// <summary>
@@ -70,7 +101,7 @@ namespace LibDbHelper
         /// <param name="createEntity">実行結果から結果セットのアイテムを作成するデリゲート</param>
         /// <param name="cancellationToken">キャンセル要求を監視するためのトークン</param>
         /// <returns>結果セット</returns>
-        public async Task<T> QueryFirstAsync<T>(string sql, IEnumerable<DbParameter> parameters = default, Func<DbDataReader, T> createEntity = default, CancellationToken cancellationToken = default) where T : class
+        public async Task<T> QueryFirstAsync<T>(string sql, Func<DbDataReader, T> createEntity, IEnumerable<DbParameter> parameters = default, CancellationToken cancellationToken = default)
         {
             using (var connection = GetConnection(ConnectionString))
             using (var command = GetCommand(sql, connection))
@@ -84,11 +115,27 @@ namespace LibDbHelper
                 {
                     if (await reader.ReadAsync(cancellationToken))
                     {
-                        return (createEntity ?? CreateEntity<T>)(reader);
+                        return createEntity(reader);
                     }
                     throw new InvalidOperationException("レコードが存在しません。");
                 }
             }
+        }
+
+        /// <summary>
+        /// QuerySingleの非同期バージョンです。
+        /// クエリを実行し結果セットを返します。
+        /// 結果セットが1件でないとき例外をスローします。
+        /// ColumnName属性に基づいてEntityを作成します。
+        /// </summary>
+        /// <typeparam name="T">結果セットのアイテムの型</typeparam>
+        /// <param name="sql">実行するSQL</param>
+        /// <param name="parameters">パラメーターのコレクション</param>
+        /// <param name="cancellationToken">キャンセル要求を監視するためのトークン</param>
+        /// <returns>結果セット</returns>
+        public async Task<T> QuerySingleAsync<T>(string sql, IEnumerable<DbParameter> parameters = default, CancellationToken cancellationToken = default) where T : class
+        {
+            return await QuerySingleAsync(sql, CreateEntity<T>, parameters, cancellationToken);
         }
 
         /// <summary>
@@ -102,7 +149,7 @@ namespace LibDbHelper
         /// <param name="createEntity">実行結果から結果セットのアイテムを作成するデリゲート</param>
         /// <param name="cancellationToken">キャンセル要求を監視するためのトークン</param>
         /// <returns>結果セット</returns>
-        public async Task<T> QuerySingleAsync<T>(string sql, IEnumerable<DbParameter> parameters = default, Func<DbDataReader, T> createEntity = default, CancellationToken cancellationToken = default) where T : class
+        public async Task<T> QuerySingleAsync<T>(string sql, Func<DbDataReader, T> createEntity, IEnumerable<DbParameter> parameters = default, CancellationToken cancellationToken = default)
         {
             using (var connection = GetConnection(ConnectionString))
             using (var command = GetCommand(sql, connection))
@@ -117,7 +164,7 @@ namespace LibDbHelper
                     var result = default(T);
                     if (await reader.ReadAsync(cancellationToken))
                     {
-                        result = (createEntity ?? CreateEntity<T>)(reader);
+                        result = createEntity(reader);
                     }
                     else
                     {
@@ -168,7 +215,7 @@ namespace LibDbHelper
 
         public abstract Task BulkInsertAsync<T>(string table, IEnumerable<string> columns, IEnumerable<string> values, IEnumerable<T> entities, Func<string, T, object> getParameterValue, char placeHolderSymbol = ':');
 
-        // ColumnAttributeを元にして結果セットを作成する
+        // ColumnNameAttributeを元にして結果セットを作成する
         private T CreateEntity<T>(DbDataReader reader) where T : class
         {
             var entity = FormatterServices.GetUninitializedObject(typeof(T)) as T;
