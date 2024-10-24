@@ -205,7 +205,29 @@ namespace LibDbHelper
                     await command.ExecuteNonQueryAsync(cancellationToken);
                     transaction.Commit();
                 }
-                catch (Exception)
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+        }
+
+        public async Task ExecuteAsyncWithTransaction(string sql, IEnumerable<DbParameter> parameters, DbTransaction transaction, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, CancellationToken cancellationToken = default)
+        {
+            using (var connection = GetConnection(ConnectionString))
+            using (var command = GetCommand(sql, connection))
+            {
+                await connection.OpenAsync(cancellationToken);
+                try
+                {
+                    if (parameters != null && parameters.Any())
+                    {
+                        command.Parameters.AddRange(parameters.ToArray());
+                    }
+                    await command.ExecuteNonQueryAsync(cancellationToken);
+                }
+                catch
                 {
                     transaction.Rollback();
                     throw;
