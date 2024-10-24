@@ -20,9 +20,9 @@ namespace LibDbHelper
             ConnectionString = connectionString;
         }
 
-        protected abstract DbConnection GetConnection(string connectionString);
+        protected abstract DbConnection GetConnection();
 
-        protected abstract DbCommand GetCommand(string sql, DbConnection connection);
+        protected abstract DbCommand GetCommand(string sql);
 
         public abstract DbParameter GetParameter(string parameterName, object value);
 
@@ -52,8 +52,8 @@ namespace LibDbHelper
         /// <returns>結果セット</returns>
         public async Task<ReadOnlyCollection<T>> QueryAsync<T>(string sql, Func<DbDataReader, T> createEntity, IEnumerable<DbParameter> parameters = default, CancellationToken cancellationToken = default)
         {
-            using (var connection = GetConnection(ConnectionString))
-            using (var command = GetCommand(sql, connection))
+            using (var connection = GetConnection())
+            using (var command = GetCommand(sql))
             {
                 await connection.OpenAsync(cancellationToken);
                 if (parameters != null && parameters.Any())
@@ -103,8 +103,8 @@ namespace LibDbHelper
         /// <returns>結果セット</returns>
         public async Task<T> QueryFirstAsync<T>(string sql, Func<DbDataReader, T> createEntity, IEnumerable<DbParameter> parameters = default, CancellationToken cancellationToken = default)
         {
-            using (var connection = GetConnection(ConnectionString))
-            using (var command = GetCommand(sql, connection))
+            using (var connection = GetConnection())
+            using (var command = GetCommand(sql))
             {
                 await connection.OpenAsync(cancellationToken);
                 if (parameters != null && parameters.Any())
@@ -151,8 +151,8 @@ namespace LibDbHelper
         /// <returns>結果セット</returns>
         public async Task<T> QuerySingleAsync<T>(string sql, Func<DbDataReader, T> createEntity, IEnumerable<DbParameter> parameters = default, CancellationToken cancellationToken = default)
         {
-            using (var connection = GetConnection(ConnectionString))
-            using (var command = GetCommand(sql, connection))
+            using (var connection = GetConnection())
+            using (var command = GetCommand(sql))
             {
                 await connection.OpenAsync(cancellationToken);
                 if (parameters != null && parameters.Any())
@@ -191,8 +191,8 @@ namespace LibDbHelper
         /// <param name="cancellationToken">キャンセル要求を監視するためのトークン</param>
         public async Task ExecuteAsync(string sql, IEnumerable<DbParameter> parameters, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, CancellationToken cancellationToken = default)
         {
-            using (var connection = GetConnection(ConnectionString))
-            using (var command = GetCommand(sql, connection))
+            using (var connection = GetConnection())
+            using (var command = GetCommand(sql))
             {
                 await connection.OpenAsync(cancellationToken);
                 var transaction = connection.BeginTransaction(isolationLevel);

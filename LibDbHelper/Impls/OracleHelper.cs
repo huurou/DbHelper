@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LibDbHelper
+namespace LibDbHelper.Impls
 {
     public class OracleHelper : DbHelper
     {
@@ -14,14 +14,14 @@ namespace LibDbHelper
         {
         }
 
-        protected override DbConnection GetConnection(string connectionString)
+        protected override DbConnection GetConnection()
         {
-            return new OracleConnection(connectionString);
+            return new OracleConnection(ConnectionString);
         }
 
-        protected override DbCommand GetCommand(string sql, DbConnection connection)
+        protected override DbCommand GetCommand(string sql)
         {
-            return new OracleCommand(sql, (OracleConnection)connection);
+            return new OracleCommand(sql, (OracleConnection)GetConnection());
         }
 
         public override DbParameter GetParameter(string parameterName, object value)

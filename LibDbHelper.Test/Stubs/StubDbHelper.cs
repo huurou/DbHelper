@@ -19,12 +19,12 @@ namespace LibDbHelper.Test.Stubs
             testOutputHelper_ = testOutputHelper;
         }
 
-        protected override DbConnection GetConnection(string connectionString)
+        protected override DbConnection GetConnection()
         {
             return new StubDbConnection(table_);
         }
 
-        protected override DbCommand GetCommand(string sql, DbConnection connection)
+        protected override DbCommand GetCommand(string sql)
         {
             return new StubDbCommand(table_);
         }
