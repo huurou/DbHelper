@@ -35,8 +35,9 @@ namespace LibDbHelper.Test
 
             // Act
             var actual = await helper_.QueryAsync(
-                sql, parameters,
-                r => new Entity(r.GetInt("col_a"), r.GetString("col_b"))
+                sql,
+                r => new Entity(r.GetInt("col_a"), r.GetString("col_b")),
+                parameters
             );
 
             // Assert
@@ -73,6 +74,28 @@ namespace LibDbHelper.Test
                 new Entity(1, "y"),
                 new Entity(2, "z"),
             }.AsReadOnly();
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public async Task QueryAsync_int返す()
+        {
+            // Arange
+            var table = new Table("col_a", "col_b")
+            {
+                { 0, "x" },
+                { 1, "y" },
+                { 2, "z" },
+            };
+            ((StubDbHelper)helper_).SetTable(table);
+            var sql = "SELECT * FROM T";
+            var parameters = new List<DbParameter> { helper_.GetParameter("n", 1) };
+
+            // Act
+            var actual = await helper_.QueryAsync(sql, r => r.GetInt("col_a"), parameters);
+
+            // Assert
+            var expected = new List<int> { 0, 1, 2 }.AsReadOnly();
             Assert.Equal(expected, actual);
         }
 
@@ -114,6 +137,25 @@ namespace LibDbHelper.Test
         }
 
         [Fact]
+        public async Task QueryFirstAsync_結果セット1件_int返す()
+        {
+            // Arange
+            var table = new Table("col_a", "col_b")
+            {
+                { 0, "x" }
+            };
+            ((StubDbHelper)helper_).SetTable(table);
+            var sql = "SELECT * FROM T";
+            var parameters = new List<DbParameter> { helper_.GetParameter("n", 1) };
+
+            // Act
+            var actual = await helper_.QueryFirstAsync(sql, r => r.GetInt("col_a"), parameters);
+
+            // Assert
+            Assert.Equal(0, actual);
+        }
+
+        [Fact]
         public async Task QuerySingleAsync_結果セット0件のとき失敗()
         {
             // Arange
@@ -148,6 +190,25 @@ namespace LibDbHelper.Test
             // Assert
             var expected = new Entity(0, "x");
             Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public async Task QuerySingleAsync_結果セット1件_int返す()
+        {
+            // Arange
+            var table = new Table("col_a", "col_b")
+            {
+                { 0, "x" }
+            };
+            ((StubDbHelper)helper_).SetTable(table);
+            var sql = "SELECT * FROM T";
+            var parameters = new List<DbParameter> { helper_.GetParameter("n", 1) };
+
+            // Act
+            var actual = await helper_.QuerySingleAsync(sql, r => r.GetInt("col_a"), parameters);
+
+            // Assert
+            Assert.Equal(0, actual);
         }
 
         [Fact]
