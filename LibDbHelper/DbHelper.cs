@@ -20,9 +20,9 @@ namespace LibDbHelper
             ConnectionString = connectionString;
         }
 
-        protected abstract DbConnection GetConnection();
+        public abstract DbConnection GetConnection();
 
-        protected abstract DbCommand GetCommand(string sql);
+        protected abstract DbCommand GetCommand(string sql, DbConnection connection);
 
         public abstract DbParameter GetParameter(string parameterName, object value);
 
@@ -53,7 +53,7 @@ namespace LibDbHelper
         public async Task<ReadOnlyCollection<T>> QueryAsync<T>(string sql, Func<DbDataReader, T> createEntity, IEnumerable<DbParameter> parameters = default, CancellationToken cancellationToken = default)
         {
             using (var connection = GetConnection())
-            using (var command = GetCommand(sql))
+            using (var command = GetCommand(sql, connection))
             {
                 await connection.OpenAsync(cancellationToken);
                 if (parameters != null && parameters.Any())
@@ -104,7 +104,7 @@ namespace LibDbHelper
         public async Task<T> QueryFirstAsync<T>(string sql, Func<DbDataReader, T> createEntity, IEnumerable<DbParameter> parameters = default, CancellationToken cancellationToken = default)
         {
             using (var connection = GetConnection())
-            using (var command = GetCommand(sql))
+            using (var command = GetCommand(sql, connection))
             {
                 await connection.OpenAsync(cancellationToken);
                 if (parameters != null && parameters.Any())
@@ -152,7 +152,7 @@ namespace LibDbHelper
         public async Task<T> QuerySingleAsync<T>(string sql, Func<DbDataReader, T> createEntity, IEnumerable<DbParameter> parameters = default, CancellationToken cancellationToken = default)
         {
             using (var connection = GetConnection())
-            using (var command = GetCommand(sql))
+            using (var command = GetCommand(sql, connection))
             {
                 await connection.OpenAsync(cancellationToken);
                 if (parameters != null && parameters.Any())
@@ -183,7 +183,7 @@ namespace LibDbHelper
         }
 
         /// <summary>
-        /// トランザクション内でSQLステートメントを実行する。
+        /// トランザクション内でSQLステートメントを実行します。
         /// </summary>
         /// <param name="sql">実行するSQL</param>
         /// <param name="parameters">パラメーターのコレクション</param>
@@ -192,7 +192,7 @@ namespace LibDbHelper
         public async Task ExecuteAsync(string sql, IEnumerable<DbParameter> parameters, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, CancellationToken cancellationToken = default)
         {
             using (var connection = GetConnection())
-            using (var command = GetCommand(sql))
+            using (var command = GetCommand(sql, connection))
             {
                 await connection.OpenAsync(cancellationToken);
                 var transaction = connection.BeginTransaction(isolationLevel);
@@ -205,11 +205,35 @@ namespace LibDbHelper
                     await command.ExecuteNonQueryAsync(cancellationToken);
                     transaction.Commit();
                 }
-                catch (Exception)
+                catch
                 {
                     transaction.Rollback();
                     throw;
                 }
+            }
+        }
+
+        /// <summary>
+        /// トランザクション内でSQLステートメントを実行します。
+        /// 事前に作成したコネクションを使用します。
+        /// トランザクションを使用する場合は事前にBeginする必要があります。
+        /// </summary>
+        /// <param name="sql">実行するSQL</param>
+        /// <param name="parameters">パラメーターのコレクション</param>
+        /// <param name="connection">コネクション</param>
+        /// <param name="isolationLevel">トランザクションロック動作のレベル</param>
+        /// <param name="cancellationToken">キャンセル要求を監視するためのトークン</param>
+        /// <returns></returns>
+        public async Task ExecuteWithConnectionAsync(string sql, IEnumerable<DbParameter> parameters, DbConnection connection, CancellationToken cancellationToken = default)
+        {
+            using (var command = GetCommand(sql, connection))
+            {
+                await connection.OpenAsync(cancellationToken);
+                if (parameters != null && parameters.Any())
+                {
+                    command.Parameters.AddRange(parameters.ToArray());
+                }
+                await command.ExecuteNonQueryAsync(cancellationToken);
             }
         }
 

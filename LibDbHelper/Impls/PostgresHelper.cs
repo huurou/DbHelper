@@ -12,14 +12,14 @@ namespace LibDbHelper.Impls
         {
         }
 
-        protected override DbConnection GetConnection()
+        public override DbConnection GetConnection()
         {
             return new NpgsqlConnection(ConnectionString);
         }
 
-        protected override DbCommand GetCommand(string sql)
+        protected override DbCommand GetCommand(string sql, DbConnection connection)
         {
-            return new NpgsqlCommand(sql, (NpgsqlConnection)GetConnection());
+            return new NpgsqlCommand(sql, (NpgsqlConnection)connection);
         }
 
         public override DbParameter GetParameter(string parameterName, object value)

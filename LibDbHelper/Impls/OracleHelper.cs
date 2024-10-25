@@ -14,14 +14,14 @@ namespace LibDbHelper.Impls
         {
         }
 
-        protected override DbConnection GetConnection()
+        public override DbConnection GetConnection()
         {
             return new OracleConnection(ConnectionString);
         }
 
-        protected override DbCommand GetCommand(string sql)
+        protected override DbCommand GetCommand(string sql, DbConnection connection)
         {
-            return new OracleCommand(sql, (OracleConnection)GetConnection());
+            return new OracleCommand(sql, (OracleConnection)connection);
         }
 
         public override DbParameter GetParameter(string parameterName, object value)
