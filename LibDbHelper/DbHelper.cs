@@ -228,7 +228,6 @@ namespace LibDbHelper
         {
             using (var command = GetCommand(sql, connection))
             {
-                await connection.OpenAsync(cancellationToken);
                 if (parameters != null && parameters.Any())
                 {
                     command.Parameters.AddRange(parameters.ToArray());
