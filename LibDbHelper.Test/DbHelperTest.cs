@@ -246,6 +246,31 @@ namespace LibDbHelper.Test
         }
 
         [Fact]
+        public async Task ExecuteAsyncWithConnection()
+        {
+            var sql1 = "UPDATE T SET col_a = 1 WHERE col_b = :b";
+            var sql2 = "UPDATE T SET col_b = 2 WHERE col_c = :c";
+            var parameters1 = new List<DbParameter> { helper_.GetParameter("b", 1) };
+            var parameters2 = new List<DbParameter> { helper_.GetParameter("c", 2) };
+            using (var connection = helper_.GetConnection())
+            {
+                await connection.OpenAsync();
+                var transaction = connection.BeginTransaction();
+                try
+                {
+                    await helper_.ExecuteWithConnectionAsync(sql1, parameters1, connection);
+                    await helper_.ExecuteWithConnectionAsync(sql2, parameters2, connection);
+                    transaction.Commit();
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+        }
+
+        [Fact]
         public async Task BulkInsertAsync()
         {
             // Arange
