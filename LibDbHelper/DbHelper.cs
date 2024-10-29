@@ -183,6 +183,30 @@ namespace LibDbHelper
         }
 
         /// <summary>
+        /// ExecuteScalarの非同期バージョン。
+        /// クエリを実行し結果セットの最初の行の最初の列を返します。
+        /// 他のすべての行および列は無視されます。
+        /// </summary>
+        /// <param name="sql">実行するSQL</param>
+        /// <param name="parameters">パラメーターのコレクション</param>
+        /// <param name="cancellationToken">キャンセル要求を監視するためのトークン</param>
+        /// <returns>結果セット内の最初の行の最初の列</returns>
+        public async Task<T> ExecuteScalarAsync<T>(string sql, List<DbParameter> parameters = default, CancellationToken cancellationToken = default)
+        {
+            using (var connection = GetConnection())
+            using (var command = GetCommand(sql, connection))
+            {
+                await connection.OpenAsync(cancellationToken);
+                if (parameters != null && parameters.Any())
+                {
+                    command.Parameters.AddRange(parameters.ToArray());
+                }
+                var result =  await command.ExecuteScalarAsync(cancellationToken);
+                return (T)result;
+            }
+        }
+
+        /// <summary>
         /// トランザクション内でSQLステートメントを実行します。
         /// </summary>
         /// <param name="sql">実行するSQL</param>

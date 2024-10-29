@@ -233,6 +233,39 @@ namespace LibDbHelper.Test
         }
 
         [Fact]
+        public async Task ExecuteScalarAsync_結果セット0件()
+        {
+            // Arange
+            var table = new Table("col_a", "col_b");
+            ((StubDbHelper)helper_).SetTable(table);
+            var sql = "SELECT * FROM T";
+
+            // Act
+            var actual = await helper_.ExecuteScalarAsync<int?>(sql);
+
+            // Assert
+            Assert.Equal(null, actual);
+        }
+
+        [Fact]
+        public async Task ExecuteScalarAsync_結果セット1件()
+        {
+            // Arange
+            var table = new Table("col_a", "col_b")
+            {
+                { 0, "x" }
+            };
+            ((StubDbHelper)helper_).SetTable(table);
+            var sql = "SELECT * FROM T";
+
+            // Act
+            var actual = await helper_.ExecuteScalarAsync<int>(sql);
+
+            // Assert
+            Assert.Equal(0, actual);
+        }
+
+        [Fact]
         public async Task ExecuteAsync()
         {
             // Arange
