@@ -244,7 +244,7 @@ namespace LibDbHelper.Test
             var actual = await helper_.ExecuteScalarAsync<int?>(sql);
 
             // Assert
-            Assert.Equal(null, actual);
+            Assert.Null(actual);
         }
 
         [Fact]
