@@ -33,7 +33,7 @@ namespace LibDbHelper.Test.Stubs
 
         public override object ExecuteScalar()
         {
-            return new object();
+            return table_.Count > 0 ? table_[0][0] : null;
         }
 
         public override void Prepare()
