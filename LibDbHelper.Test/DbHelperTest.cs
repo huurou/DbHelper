@@ -4,20 +4,16 @@ using LibDbHelper.Test.Stubs;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace LibDbHelper.Test
 {
     public class DbHelperTest
     {
-        private readonly DbHelper helper_;
-
-        public DbHelperTest(ITestOutputHelper testOutputHelper)
-        {
-            helper_ = new StubDbHelper(testOutputHelper);
-        }
+        private readonly DbHelper helper_ = new StubDbHelper();
 
         [Fact]
         public async Task QueryAsync_ColumnName属性不使用()
@@ -314,8 +310,10 @@ namespace LibDbHelper.Test
             {
                 new Entity(0, "x"),
                 new Entity(1, "y"),
-                new Entity(2, "z"),
+                new Entity(2, "z")
             };
+            ((StubDbHelper)helper_).SqlExecuted += (s, e) => AssertSql(e.Sql, e.Time);
+            ((StubDbHelper)helper_).ParametersCreated += (s, e) => AssertParameters(e.Parameters, e.Time);
 
             // Act
             await helper_.BulkInsertAsync(
@@ -337,6 +335,288 @@ namespace LibDbHelper.Test
             );
 
             // Assert
+            // Stubで発行したイベントでAssertを行います。
+            void AssertSql(string sql, int time)
+            {
+                // 改行コードの違いでテストに失敗しないようにStringBuilderを使用します。
+                var sb = new StringBuilder();
+                sb.AppendLine("INSERT ALL");
+                sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                sb.AppendLine("VALUES (:a0,:b0,c)");
+                sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                sb.AppendLine("VALUES (:a1,:b1,c)");
+                sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                sb.AppendLine("VALUES (:a2,:b2,c)");
+                sb.Append("SELECT * FROM DUAL");
+                var expected = sb.ToString();
+                Assert.Equal(0, time);
+                Assert.Equal(expected, sql);
+            }
+
+            void AssertParameters(List<DbParameter> parameters, int time)
+            {
+                var expected = new Dictionary<string, object>
+                {
+                    { "a0", 0 },
+                    { "b0", "x" },
+                    { "a1", 1 },
+                    { "b1", "y" },
+                    { "a2", 2 },
+                    { "b2", "z" }
+                };
+                Assert.Equal(0, time);
+                Assert.Equal(expected, parameters.ToDictionary(x => x.ParameterName, x => x.Value));
+            }
+        }
+
+        [Fact]
+        public async Task BulkInsertAsync_chunkSize()
+        {
+            // Arange
+            var table = "Schema.Table";
+            var columns = new List<string> { "col_a", "col_b", "col_c" };
+            var values = new List<string> { ":a", ":b", "c" };
+            var entities = new List<Entity>
+            {
+                new Entity(0, "a"),
+                new Entity(1, "b"),
+                new Entity(2, "c"),
+                new Entity(3, "d"),
+                new Entity(4, "e"),
+                new Entity(5, "f"),
+                new Entity(6, "g"),
+                new Entity(7, "h"),
+                new Entity(8, "i"),
+                new Entity(9, "j"),
+                new Entity(10, "k"),
+                new Entity(11, "l"),
+                new Entity(12, "m"),
+                new Entity(13, "n"),
+                new Entity(14, "o"),
+                new Entity(15, "p"),
+                new Entity(16, "q"),
+                new Entity(17, "r"),
+                new Entity(18, "s"),
+                new Entity(19, "t"),
+                new Entity(20, "u"),
+                new Entity(21, "v"),
+                new Entity(22, "w"),
+                new Entity(23, "x"),
+                new Entity(24, "y"),
+                new Entity(25, "z")
+            };
+            var chunkSize = 10;
+            ((StubDbHelper)helper_).SqlExecuted += (s, e) => AssertSql(e.Sql, e.Time);
+            ((StubDbHelper)helper_).ParametersCreated += (s, e) => AssertParameters(e.Parameters, e.Time);
+
+            // Act
+            await helper_.BulkInsertAsync(
+                table, columns, values, entities,
+                (name, x) =>
+                {
+                    switch (name)
+                    {
+                        case "a":
+                            return x.A;
+
+                        case "b":
+                            return x.B;
+
+                        default:
+                            throw new ArgumentException($"登録されていないパラメーター名です。 name:{name}", nameof(name));
+                    }
+                },
+                chunkSize
+            );
+
+            // Assert
+            // Stubで発行したイベントでAssertを行います。
+            void AssertSql(string sql, int time)
+            {
+                // 改行コードの違いでテストに失敗しないようにStringBuilderを使用します。
+                var sb = new StringBuilder();
+                switch (time)
+                {
+                    case 0:
+                        sb.AppendLine("INSERT ALL");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a0,:b0,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a1,:b1,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a2,:b2,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a3,:b3,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a4,:b4,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a5,:b5,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a6,:b6,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a7,:b7,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a8,:b8,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a9,:b9,c)");
+                        sb.Append("SELECT * FROM DUAL");
+                        break;
+
+                    case 1:
+                        sb.AppendLine("INSERT ALL");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a0,:b0,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a1,:b1,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a2,:b2,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a3,:b3,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a4,:b4,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a5,:b5,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a6,:b6,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a7,:b7,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a8,:b8,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a9,:b9,c)");
+                        sb.Append("SELECT * FROM DUAL");
+                        break;
+
+                    case 2:
+                        sb.AppendLine("INSERT ALL");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a0,:b0,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a1,:b1,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a2,:b2,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a3,:b3,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a4,:b4,c)");
+                        sb.AppendLine("INTO Schema.Table (col_a,col_b,col_c)");
+                        sb.AppendLine("VALUES (:a5,:b5,c)");
+                        sb.Append("SELECT * FROM DUAL");
+                        break;
+
+                    default:
+                        break;
+                }
+                var expected = sb.ToString();
+                Assert.Equal(expected, sql);
+            }
+
+            void AssertParameters(List<DbParameter> parameters, int time)
+            {
+                Dictionary<string, object> expected = null;
+                switch (time)
+                {
+                    case 0:
+                        expected = new Dictionary<string, object>
+                        {
+                            { "a0", 0 },
+                            { "b0", "a" },
+                            { "a1", 1 },
+                            { "b1", "b" },
+                            { "a2", 2 },
+                            { "b2", "c" },
+                            { "a3", 3 },
+                            { "b3", "d" },
+                            { "a4", 4 },
+                            { "b4", "e" },
+                            { "a5", 5 },
+                            { "b5", "f" },
+                            { "a6", 6 },
+                            { "b6", "g" },
+                            { "a7", 7 },
+                            { "b7", "h" },
+                            { "a8", 8 },
+                            { "b8", "i" },
+                            { "a9", 9 },
+                            { "b9", "j" },
+                        };
+                        break;
+
+                    case 1:
+                        expected = new Dictionary<string, object>
+                        {
+                            { "a0", 10 },
+                            { "b0", "k" },
+                            { "a1", 11 },
+                            { "b1", "l" },
+                            { "a2", 12 },
+                            { "b2", "m" },
+                            { "a3", 13 },
+                            { "b3", "n" },
+                            { "a4", 14 },
+                            { "b4", "o" },
+                            { "a5", 15 },
+                            { "b5", "p" },
+                            { "a6", 16 },
+                            { "b6", "q" },
+                            { "a7", 17 },
+                            { "b7", "r" },
+                            { "a8", 18 },
+                            { "b8", "s" },
+                            { "a9", 19 },
+                            { "b9", "t" }
+                        };
+                        break;
+
+                    case 2:
+                        expected = new Dictionary<string, object>
+                        {
+                            { "a0", 20 },
+                            { "b0", "u" },
+                            { "a1", 21 },
+                            { "b1", "v" },
+                            { "a2", 22 },
+                            { "b2", "w" },
+                            { "a3", 23 },
+                            { "b3", "x" },
+                            { "a4", 24 },
+                            { "b4", "y" },
+                            { "a5", 25 },
+                            { "b5", "z" }
+                        };
+                        break;
+
+                    default: break;
+                }
+                Assert.Equal(expected, parameters.ToDictionary(x => x.ParameterName, x => x.Value));
+            }
+        }
+
+        [Fact]
+        public async Task BulkInsertAsync_ChunkSize0なら失敗()
+        {
+            // Arange
+            var table = "Schema.Table";
+            var columns = new List<string> { "col_a", "col_b", "col_c" };
+            var values = new List<string> { ":a", ":b", "c" };
+            var entities = new List<Entity>
+            {
+                new Entity(0, "x"),
+                new Entity(1, "y"),
+                new Entity(2, "z")
+            };
+
+            // Act
+            var ex = await Record.ExceptionAsync(async () =>
+                await helper_.BulkInsertAsync(
+                    table, columns, values, entities,
+                    (name, x) => throw new NotImplementedException(),
+                    0
+                )
+            );
+
+            // Assert
+            Assert.IsType<ArgumentException>(ex);
         }
 
         private class Entity : IEquatable<Entity>

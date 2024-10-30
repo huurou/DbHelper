@@ -260,7 +260,19 @@ namespace LibDbHelper
             }
         }
 
-        public abstract Task BulkInsertAsync<T>(string table, IEnumerable<string> columns, IEnumerable<string> values, IEnumerable<T> entities, Func<string, T, object> getParameterValue, char placeHolderSymbol = ':');
+        /// <summary>
+        /// 指定のテーブルに対して一括でInsertを行います。RDBMSによって文法が異なるのでそれぞれのHelperでの実装が必要です。
+        /// </summary>
+        /// <typeparam name="T">Insert対象データモデル</typeparam>
+        /// <param name="table">テーブル名</param>
+        /// <param name="columns">列名のコレクション</param>
+        /// <param name="values">値のコレクション SQLにて記載される値</param>
+        /// <param name="entities">データモデルのコレクション</param>
+        /// <param name="getParameterValue">bind変数名を元にInsertしたい値を返すFunc</param>
+        /// <param name="chunkSize">一度にInsertする行数</param>
+        /// <param name="placeHolderSymbol">bind変数の先頭につく記号</param>
+        /// <returns></returns>
+        public abstract Task BulkInsertAsync<T>(string table, IEnumerable<string> columns, IEnumerable<string> values, IEnumerable<T> entities, Func<string, T, object> getParameterValue, int chunkSize = 1000, char placeHolderSymbol = ':');
 
         // ColumnNameAttributeを元にして結果セットを作成する
         private T CreateEntity<T>(DbDataReader reader) where T : class
