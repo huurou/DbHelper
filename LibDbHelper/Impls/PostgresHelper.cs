@@ -27,7 +27,7 @@ namespace LibDbHelper.Impls
             return new NpgsqlParameter(parameterName, value);
         }
 
-        public override Task BulkInsertAsync<T>(string table, IEnumerable<string> columns, IEnumerable<string> values, IEnumerable<T> entities, Func<string, T, object> getParameterValue, char placeHolderSymbol)
+        public override Task BulkInsertAsync<T>(string table, IEnumerable<string> columns, IEnumerable<string> values, IEnumerable<T> entities, Func<string, T, object> getParameterValue, int chunkSize, char placeHolderSymbol)
         {
             throw new NotImplementedException();
         }
