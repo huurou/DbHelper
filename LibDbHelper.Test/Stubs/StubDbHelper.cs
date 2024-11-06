@@ -82,6 +82,11 @@ namespace LibDbHelper.Test.Stubs
             }
         }
 
+        public override Task BulkUpsertAsync<T>(string table, IEnumerable<string> columns, string primaryKey, IEnumerable<string> values, IEnumerable<T> entities, Func<string, T, object> getParameterValue, int chunkSize = 1000, char placeHolderSymbol = ':')
+        {
+            throw new NotImplementedException();
+        }
+
         public void SetTable(Table table)
         {
             table_ = table;
