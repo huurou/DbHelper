@@ -201,7 +201,7 @@ namespace LibDbHelper
                 {
                     command.Parameters.AddRange(parameters.ToArray());
                 }
-                var result =  await command.ExecuteScalarAsync(cancellationToken);
+                var result = await command.ExecuteScalarAsync(cancellationToken);
                 return (T)result;
             }
         }
@@ -300,7 +300,8 @@ namespace LibDbHelper
                 }
                 else
                 {
-                    var typeCode = Type.GetTypeCode(underlyingType ?? propType);
+                    var type = underlyingType ?? propType;
+                    var typeCode = Type.GetTypeCode(type);
                     switch (typeCode)
                     {
                         case TypeCode.Boolean:
@@ -363,8 +364,15 @@ namespace LibDbHelper
                             propInfo.SetValue(entity, reader.GetString(columnIndex));
                             break;
 
-                        case TypeCode.Empty:
                         case TypeCode.Object:
+                            propInfo.SetValue(
+                                entity,
+                                type == typeof(Guid) ? reader.GetGuid(columnIndex)
+                                    : throw new NotSupportedException($"TypeCode:{typeCode} propType:{propType} propName:{propInfo.Name}")
+                            );
+                            break;
+
+                        case TypeCode.Empty:
                         case TypeCode.DBNull:
                         default: throw new NotSupportedException($"TypeCode:{typeCode} propType:{propType} propName:{propInfo.Name}");
                     }

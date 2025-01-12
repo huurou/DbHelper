@@ -619,6 +619,36 @@ namespace LibDbHelper.Test
             Assert.IsType<ArgumentException>(ex);
         }
 
+        [Fact]
+        public async Task QueryAsync_ColumnName属性使用Guid列あり()
+        {
+            // Arange
+            var guid0 = Guid.NewGuid();
+            var guid1 = Guid.NewGuid();
+            var guid2 = Guid.NewGuid();
+            var table = new Table("col_a", "col_b", "col_c")
+            {
+                { 0, "x" , guid0 },
+                { 1, "y" , guid1 },
+                { 2, "z" , guid2 },
+            };
+            ((StubDbHelper)helper_).SetTable(table);
+            var sql = "SELECT * FROM T";
+            var parameters = new List<DbParameter> { helper_.GetParameter("n", 1) };
+
+            // Act
+            var actual = await helper_.QueryAsync<Entity2>(sql, parameters);
+
+            // Assert
+            var expected = new List<Entity2>
+            {
+                new Entity2(0, "x", guid0 ),
+                new Entity2(1, "y", guid1 ),
+                new Entity2(2, "z", guid2 ),
+            }.AsReadOnly();
+            Assert.Equal(expected, actual);
+        }
+
         private class Entity : IEquatable<Entity>
         {
             [ColumnName("col_a")]
@@ -638,6 +668,33 @@ namespace LibDbHelper.Test
                 return other != null &&
                     A == other.A &&
                     B == other.B;
+            }
+        }
+
+        private class Entity2 : IEquatable<Entity2>
+        {
+            [ColumnName("col_a")]
+            public int A { get; set; }
+
+            [ColumnName("col_b")]
+            public string B { get; set; }
+
+            [ColumnName("col_c")]
+            public Guid C { get; set; }
+
+            public Entity2(int a, string b, Guid c)
+            {
+                A = a;
+                B = b;
+                C = c;
+            }
+
+            public bool Equals(Entity2 other)
+            {
+                return other != null &&
+                    A == other.A &&
+                    B == other.B &&
+                    C == other.C;
             }
         }
     }
