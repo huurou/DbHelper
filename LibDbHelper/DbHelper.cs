@@ -280,10 +280,8 @@ namespace LibDbHelper
             var entity = FormatterServices.GetUninitializedObject(typeof(T)) as T;
             foreach (var propInfo in typeof(T).GetProperties())
             {
-                if (!(Attribute.GetCustomAttribute(propInfo, typeof(ColumnNameAttribute)) is ColumnNameAttribute columnNameAttribute)) { continue; }
+                var columnIndex = reader.GetOrdinal(Attribute.GetCustomAttribute(propInfo, typeof(ColumnNameAttribute)) is ColumnNameAttribute columnNameAttribute ? columnNameAttribute.ColumnName : propInfo.Name);
                 var propType = propInfo.PropertyType;
-
-                var columnIndex = reader.GetOrdinal(columnNameAttribute.ColumnName);
                 // プロパティがNull許容値型の場合の基の型 Null許容値型でない場合はnull
                 var underlyingType = Nullable.GetUnderlyingType(propType);
                 if (reader.IsDBNull(columnIndex))

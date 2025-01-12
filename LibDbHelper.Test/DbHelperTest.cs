@@ -649,6 +649,33 @@ namespace LibDbHelper.Test
             Assert.Equal(expected, actual);
         }
 
+        [Fact]
+        public async Task QueryAsync_ColumnName属性不使用でCreateEntity()
+        {
+            // Arange
+            var table = new Table("col_a", "col_b")
+            {
+                { 0, "x" },
+                { 1, "y" },
+                { 2, "z" },
+            };
+            ((StubDbHelper)helper_).SetTable(table);
+            var sql = "SELECT * FROM T";
+            var parameters = new List<DbParameter> { helper_.GetParameter("n", 1) };
+
+            // Act
+            var actual = await helper_.QueryAsync<Entity3>(sql);
+
+            // Assert
+            var expected = new List<Entity3>
+            {
+                new Entity3(0, "x"),
+                new Entity3(1, "y"),
+                new Entity3(2, "z"),
+            }.AsReadOnly();
+            Assert.Equal(expected, actual);
+        }
+
         private class Entity : IEquatable<Entity>
         {
             [ColumnName("col_a")]
@@ -695,6 +722,27 @@ namespace LibDbHelper.Test
                     A == other.A &&
                     B == other.B &&
                     C == other.C;
+            }
+        }
+
+        private class Entity3 : IEquatable<Entity3>
+        {
+#pragma warning disable IDE1006 // 命名スタイル
+            public int col_a { get; set; }
+            public string col_b { get; set; }
+#pragma warning restore IDE1006 // 命名スタイル
+
+            public Entity3(int a, string b)
+            {
+                col_a = a;
+                col_b = b;
+            }
+
+            public bool Equals(Entity3 other)
+            {
+                return other != null &&
+                    col_a == other.col_a &&
+                    col_b == other.col_b;
             }
         }
     }
