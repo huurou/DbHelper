@@ -30,6 +30,7 @@ namespace LibDbHelper
         /// Queryの非同期バージョンです。
         /// クエリを実行し結果セットを返します。
         /// ColumnName属性に基づいてEntityを作成します。
+        /// ColumnName属性が付与されていない場合はプロパティ名を使用します。
         /// </summary>
         /// <typeparam name="T">結果セットのアイテムの型</typeparam>
         /// <param name="sql">実行するSQL</param>
@@ -43,6 +44,8 @@ namespace LibDbHelper
         /// <summary>
         /// Queryの非同期バージョンです。
         /// クエリを実行し結果セットを返します。
+        /// ColumnName属性に基づいてEntityを作成します。
+        /// ColumnName属性が付与されていない場合はプロパティ名を使用します。
         /// </summary>
         /// <typeparam name="T">結果セットのアイテムの型</typeparam>
         /// <param name="sql">実行するSQL</param>
@@ -78,6 +81,7 @@ namespace LibDbHelper
         /// 他のすべての行は無視されます。
         /// 結果セットが0件のとき例外をスローします。
         /// ColumnName属性に基づいてEntityを作成します。
+        /// ColumnName属性が付与されていない場合はプロパティ名を使用します。
         /// </summary>
         /// <typeparam name="T">結果セットのアイテムの型</typeparam>
         /// <param name="sql">実行するSQL</param>
@@ -94,6 +98,8 @@ namespace LibDbHelper
         /// クエリを実行し結果セットの最初の行を返します。
         /// 他のすべての行は無視されます。
         /// 結果セットが0件のとき例外をスローします。
+        /// ColumnName属性に基づいてEntityを作成します。
+        /// ColumnName属性が付与されていない場合はプロパティ名を使用します。
         /// </summary>
         /// <typeparam name="T">結果セットのアイテムの型</typeparam>
         /// <param name="sql">実行するSQL</param>
@@ -127,6 +133,7 @@ namespace LibDbHelper
         /// クエリを実行し結果セットを返します。
         /// 結果セットが1件でないとき例外をスローします。
         /// ColumnName属性に基づいてEntityを作成します。
+        /// ColumnName属性が付与されていない場合はプロパティ名を使用します。
         /// </summary>
         /// <typeparam name="T">結果セットのアイテムの型</typeparam>
         /// <param name="sql">実行するSQL</param>
@@ -142,6 +149,8 @@ namespace LibDbHelper
         /// QuerySingleの非同期バージョンです。
         /// クエリを実行し結果セットを返します。
         /// 結果セットが1件でないとき例外をスローします。
+        /// ColumnName属性に基づいてEntityを作成します。
+        /// ColumnName属性が付与されていない場合はプロパティ名を使用します。
         /// </summary>
         /// <typeparam name="T">結果セットのアイテムの型</typeparam>
         /// <param name="sql">実行するSQL</param>
@@ -275,6 +284,7 @@ namespace LibDbHelper
         public abstract Task BulkInsertAsync<T>(string table, IEnumerable<string> columns, IEnumerable<string> values, IEnumerable<T> entities, Func<string, T, object> getParameterValue, int chunkSize = 1000, char placeHolderSymbol = ':');
 
         // ColumnNameAttributeを元にして結果セットを作成する
+        // ColumnNameAttributeがない場合はプロパティ名を使用する
         private T CreateEntity<T>(DbDataReader reader) where T : class
         {
             var entity = FormatterServices.GetUninitializedObject(typeof(T)) as T;
