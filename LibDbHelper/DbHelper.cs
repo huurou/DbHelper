@@ -5,7 +5,9 @@ using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -299,13 +301,20 @@ namespace LibDbHelper
         public abstract Task BulkUpsertAsync<T>(string table, IEnumerable<string> columns, string primaryKey, IEnumerable<string> values, IEnumerable<T> entities, Func<string, T, object> getParameterValue, int chunkSize = 1000, char placeHolderSymbol = ':');
 
         // ColumnNameAttributeを元にして結果セットを作成する
-        // ColumnNameAttributeがない場合はプロパティ名を使用する
+        // クラスにPascalToSnakeAttributeがついていた場合、ColumnNameAttributeが付いていないならプロパティ名をスネークケースに変換して列名に使用する
+        // どちらもない場合はプロパティ名を使用する
         private T CreateEntity<T>(DbDataReader reader) where T : class
         {
             var entity = FormatterServices.GetUninitializedObject(typeof(T)) as T;
+            var pascalToSnakeAttribute = typeof(T).GetCustomAttribute(typeof(PascalToSnakeAttribute)) as PascalToSnakeAttribute;
             foreach (var propInfo in typeof(T).GetProperties())
             {
-                var columnIndex = reader.GetOrdinal(Attribute.GetCustomAttribute(propInfo, typeof(ColumnNameAttribute)) is ColumnNameAttribute columnNameAttribute ? columnNameAttribute.ColumnName : propInfo.Name);
+                var attribute = propInfo.GetCustomAttribute(typeof(ColumnNameAttribute));
+                var columnName =
+                    attribute is ColumnNameAttribute columnNameAttribute ? columnNameAttribute.ColumnName
+                    : pascalToSnakeAttribute != null ? ToSnakeCase(propInfo.Name)
+                    : propInfo.Name;
+                var columnIndex = reader.GetOrdinal(columnName);
                 var propType = propInfo.PropertyType;
                 // プロパティがNull許容値型の場合の基の型 Null許容値型でない場合はnull
                 var underlyingType = Nullable.GetUnderlyingType(propType);
@@ -402,6 +411,11 @@ namespace LibDbHelper
                 }
             }
             return entity;
+        }
+
+        private static string ToSnakeCase(string name)
+        {
+            return new Regex("[a-z][A-Z]").Replace(name, s => $"{s.Groups[0].Value[0]}_{s.Groups[0].Value[1]}").ToUpper();
         }
     }
 }
