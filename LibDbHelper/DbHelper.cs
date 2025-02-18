@@ -415,7 +415,7 @@ namespace LibDbHelper
 
         private static string ToSnakeCase(string name)
         {
-            return new Regex("[a-z][A-Z]").Replace(name, s => $"{s.Groups[0].Value[0]}_{s.Groups[0].Value[1]}").ToUpper();
+            return new Regex("[a-z][A-Z]").Replace(name, s => $"{s.Value[0]}_{s.Value[1]}").ToLower();
         }
     }
 }

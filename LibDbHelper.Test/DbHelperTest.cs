@@ -661,7 +661,6 @@ namespace LibDbHelper.Test
             };
             ((StubDbHelper)helper_).SetTable(table);
             var sql = "SELECT * FROM T";
-            var parameters = new List<DbParameter> { helper_.GetParameter("n", 1) };
 
             // Act
             var actual = await helper_.QueryAsync<Entity3>(sql);
@@ -672,6 +671,58 @@ namespace LibDbHelper.Test
                 new Entity3(0, "x"),
                 new Entity3(1, "y"),
                 new Entity3(2, "z"),
+            }.AsReadOnly();
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public async Task QueryAsync_PascalToSnake属性つきクラス()
+        {
+            // Arange
+            var table = new Table("col_a", "col_b")
+            {
+                { 0, "x" },
+                { 1, "y" },
+                { 2, "z" },
+            };
+            ((StubDbHelper)helper_).SetTable(table);
+            var sql = "SELECT * FROM T";
+
+            // Act
+            var actual = await helper_.QueryAsync<Entity4>(sql);
+
+            // Assert
+            var expected = new List<Entity4>
+            {
+                new Entity4(0, "x"),
+                new Entity4(1, "y"),
+                new Entity4(2, "z"),
+            }.AsReadOnly();
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public async Task QueryAsync_PascalToSnake属性つきクラス_一部ColumnName属性つきプロパティ()
+        {
+            // Arange
+            var table = new Table("col_a", "ColumnB")
+            {
+                { 0, "x" },
+                { 1, "y" },
+                { 2, "z" },
+            };
+            ((StubDbHelper)helper_).SetTable(table);
+            var sql = "SELECT * FROM T";
+
+            // Act
+            var actual = await helper_.QueryAsync<Entity5>(sql);
+
+            // Assert
+            var expected = new List<Entity5>
+            {
+                new Entity5(0, "x"),
+                new Entity5(1, "y"),
+                new Entity5(2, "z"),
             }.AsReadOnly();
             Assert.Equal(expected, actual);
         }
@@ -745,11 +796,53 @@ namespace LibDbHelper.Test
                     col_b == other.col_b;
             }
         }
+
+        [PascalToSnake]
+        private class Entity4 : IEquatable<Entity4>
+        {
+            public int ColA { get; set; }
+            public string ColB { get; set; }
+
+            public Entity4(int colA, string colB)
+            {
+                ColA = colA;
+                ColB = colB;
+            }
+
+            public bool Equals(Entity4 other)
+            {
+                return other != null &&
+                    ColA == other.ColA &&
+                    ColB == other.ColB;
+            }
+        }
+
+        [PascalToSnake]
+        private class Entity5 : IEquatable<Entity5>
+        {
+            public int ColA { get; set; }
+
+            [ColumnName("ColumnB")]
+            public string ColB { get; set; }
+
+            public Entity5(int colA, string colB)
+            {
+                ColA = colA;
+                ColB = colB;
+            }
+
+            public bool Equals(Entity5 other)
+            {
+                return other != null &&
+                    ColA == other.ColA &&
+                    ColB == other.ColB;
+            }
+        }
+
+        // Arange
+
+        // Act
+
+        // Assert
     }
-
-    // Arange
-
-    // Act
-
-    // Assert
 }
