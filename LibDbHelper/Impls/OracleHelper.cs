@@ -72,5 +72,10 @@ namespace LibDbHelper.Impls
                 await ExecuteAsync(sql.ToString(), parameters);
             }
         }
+
+        public override Task BulkUpsertAsync<T>(string table, IEnumerable<string> columns, string primaryKey, IEnumerable<string> values, IEnumerable<T> entities, Func<string, T, object> getParameterValue, int chunkSize = 1000, char placeHolderSymbol = ':')
+        {
+            throw new NotImplementedException();
+        }
     }
 }
