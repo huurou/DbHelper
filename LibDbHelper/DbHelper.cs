@@ -306,13 +306,13 @@ namespace LibDbHelper
         private T CreateEntity<T>(DbDataReader reader) where T : class
         {
             var entity = FormatterServices.GetUninitializedObject(typeof(T)) as T;
-            var pascalToSnakeAttribute = typeof(T).GetCustomAttribute(typeof(PascalToSnakeAttribute)) as PascalToSnakeAttribute;
+            var pascalToSnakeAttached = typeof(T).GetCustomAttribute(typeof(PascalToSnakeAttribute)) != null;
             foreach (var propInfo in typeof(T).GetProperties())
             {
                 var attribute = propInfo.GetCustomAttribute(typeof(ColumnNameAttribute));
                 var columnName =
                     attribute is ColumnNameAttribute columnNameAttribute ? columnNameAttribute.ColumnName
-                    : pascalToSnakeAttribute != null ? ToSnakeCase(propInfo.Name)
+                    : pascalToSnakeAttached ? ToSnakeCase(propInfo.Name)
                     : propInfo.Name;
                 var columnIndex = reader.GetOrdinal(columnName);
                 var propType = propInfo.PropertyType;
